@@ -253,13 +253,13 @@ void socket::srt::assert_options_valid(const std::map<string, string>& options, 
 	for (const auto& [key, val] : options)
 	{
 #else
-	for (const auto el : options)
+	for (const auto& el : options)
 	{
 		const string& key = el.first;
 		const string& val = el.second;
 #endif
 		bool opt_found = false;
-		for (const auto o : srt_options)
+		for (const auto& o : srt_options)
 		{
 			if (o.name != key)
 				continue;
@@ -302,9 +302,9 @@ int socket::srt::configure_pre(SRTSOCKET sock)
 	if (conmode == SocketOption::FAILURE)
 	{
 		stringstream ss;
+		ss << "Wrong value of option(s): ";
 		copy(failures.begin(), failures.end(), ostream_iterator<string>(ss, ", "));
-		 
-		return SRT_ERROR;
+		throw socket::exception(ss.str());
 	}
 
 	m_mode = static_cast<connection_mode>(conmode);
@@ -336,7 +336,7 @@ std::string socket::srt::print_negotiated_config(SRTSOCKET sock)
 		{4, "BADSECRET"}  //Stream encrypted and wrong secret, cannot decrypt Keying Material        
 	};
 
-	auto convert = [](int v, const map<int, const char*> values) -> const char* {
+	auto convert = [](int v, const map<int, const char*>& values) {
 		const auto m = values.find(v);
 		if (m == values.end())
 			return "INVALID";
@@ -344,13 +344,13 @@ std::string socket::srt::print_negotiated_config(SRTSOCKET sock)
 		return m->second;
 	};
 
-	auto get_sock_value = [](int sock, SRT_SOCKOPT sockopt, const char* const sockopt_str) {
+	auto get_sock_value = [](int s, SRT_SOCKOPT sopt, const char* const sopt_str) {
 		int ival = 0;
 		int ilen = sizeof ival;
-		const int res = srt_getsockflag(sock, sockopt, &ival, &ilen);
+		const int res = srt_getsockflag(s, sopt, &ival, &ilen);
 		if (res != SRT_SUCCESS)
 		{
-			spdlog::error(LOG_SOCK_SRT "Failed to get sockopt {}.", sockopt, sockopt_str);
+			spdlog::error(LOG_SOCK_SRT "Failed to get sockopt {}.", sopt_str);
 			return -1;
 		}
 		return ival;
@@ -362,22 +362,45 @@ std::string socket::srt::print_negotiated_config(SRTSOCKET sock)
 	const int km_state_rcv = get_sock_value(sock, VAL_AND_STR(SRTO_RCVKMSTATE));
 	const int km_state_snd = get_sock_value(sock, VAL_AND_STR(SRTO_SNDKMSTATE));
 
+	std::string latency_str;
+	if (get_sock_value(sock, VAL_AND_STR(SRTO_TSBPDMODE)) > 0)
+	{
+		const int latency_rcv  = get_sock_value(sock, VAL_AND_STR(SRTO_RCVLATENCY));
+		const int latency_peer = get_sock_value(sock, VAL_AND_STR(SRTO_PEERLATENCY));
+		latency_str = fmt::format("Latency RCV {}ms, peer {}ms", latency_rcv, latency_peer);
+	}
+	else
+	{
+		latency_str = "off";
+	}
+
 #if ENABLE_AEAD_API_PREVIEW
 	const int crypto_mode  = get_sock_value(sock, VAL_AND_STR(SRTO_CRYPTOMODE));
-	const auto crypto_mode_str = fmt::format(". Cryptomode {}", convert(crypto_mode, cryptomodes));
+	const auto crypto_mode_str = fmt::format("{}", convert(crypto_mode, cryptomodes));
 #else
 	const string crypto_mode_str = "";
 #endif
 #undef VAL_AND_STR
+	
+	// Template lambdas are only available since C++20, have to duplicate the code.
+	std::string streamid(512, '\0');
+	int         streamid_len = (int) streamid.size();
+	if (srt_getsockflag(sock, SRTO_STREAMID, (void*)streamid.data(), &streamid_len) != SRT_SUCCESS)
+	{
+		spdlog::error(LOG_SOCK_SRT "Failed to get sockopt SRTO_STREAMID.");
+		streamid_len = 0;
+	}
 
-	return fmt::format("KM state {} (RCV {}, SND {}). PB key length : {}{}",
+	return fmt::format("TSBPD {}. KM state {} (RCV {}, SND {}). PB key length: {}. Cryptomode {}. Stream ID: {}",
+					   latency_str,
 					   convert(km_state, km_states),
 					   convert(km_state_rcv, km_states),
 					   convert(km_state_snd, km_states),
-					   pbkeylen, crypto_mode_str);
+					   pbkeylen, crypto_mode_str,
+					   streamid_len > 0 ? streamid : "not set");
 }
 
-int socket::srt::configure_post(SRTSOCKET sock)
+int socket::srt::configure_post(SRTSOCKET sock) const
 {
 	int is_blocking = m_blocking_mode ? 1 : 0;
 
