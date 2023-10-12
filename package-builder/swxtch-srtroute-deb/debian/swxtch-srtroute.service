@@ -1,0 +1,19 @@
+# swXtch.io swxtch-srtroute service (systemd service unit)
+[Unit]
+Description=swXtch.io swxtch-srtroute service
+After=syslog.target
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/var/opt/swxtch
+ExecStart=/usr/bin/swxtch-srtroute /var/opt/swxtch/streams.csv
+# Use SIGINT instead of SIGTERM since swxtch apps handle SIGINT (crtl-C) and gracefully shutdown.
+KillSignal=SIGINT
+# Restart on success, failure, and any emitted signals like HUP.
+Restart=always
+# Wait 30 seconds before respawn attempts.
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target

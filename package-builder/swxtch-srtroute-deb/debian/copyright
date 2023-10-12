@@ -1,0 +1,6 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: swxtch-srtroute
+
+Files: *
+Copyright: 2023 swxtch.io LLC
+License: https://www.swxtch.io/software-license-agreement

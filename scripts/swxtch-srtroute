@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+# Copyright (C) 2022 swXtch.io
+# Permission to copy and modify is granted under the MIT license
+# Purpose: Bulk run and monitoring of swxtch-srt
+# Author : Ricky Tran
+###############################################################################
+# Log the given message at the given level. All logs are written to stderr with a timestamp.
+log() {
+    local -r level="$1"
+    local -r message="$2"
+    local -r timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+    local -r script_name="$(basename "$0")"
+    >&2 echo -e "${timestamp} [${level}] [$script_name] ${message}"
+}
+
+# Log the given message at INFO level. All logs are written to stderr with a timestamp.
+log_info() {
+    local -r message="$1"
+    log "INFO" "$message"
+}
+
+# Log the given message at WARN level. All logs are written to stderr with a timestamp.
+log_warn() {
+    local -r message="$1"
+    log "WARN" "$message"
+}
+
+# Log the given message at ERROR level. All logs are written to stderr with a timestamp.
+log_error() {
+    local -r message="$1"
+    log "ERROR" "$message"
+}
+
+# Check error when a command was ran. If failed log message
+check_error() {
+    if [ $? -ne 0 ]
+    then
+        log_error "${1}"
+    fi
+}
+# Check if swxtch-srt is Installed
+hash swxtch-srt 2>/dev/null || { log_error "swxtch-srt not installed. Aborting."; exit 1; }
+###############################################################################
+FILE=${1:-multicast_groups.csv}
+RESTART_TIME=${2:-1}
+if [ $# -eq 0 ]; then
+    log_error "Multicast group information file not provided!"
+    exit 1
+fi
+# INPUTS
+INPUTS=(
+)
+# OUTPUTS
+OUTPUTS=(
+)
+log_info "Starting... bulk run of swxtch-srt..."
+###############################################################################
+# Read Inputs and Outputs from CSV
+OLDIFS=$IFS
+IFS=','
+[ ! -f $FILE ] && { log_error "$FILE file not found"; exit 99; }
+[ ! -s $FILE ] && { log_error "$FILE file is empty"; exit 99; }
+while read INPUT OUTPUT
+do
+    INPUTS+=("$INPUT")
+    OUTPUTS+=("$OUTPUT")
+done < $FILE
+IFS=$OLDIFS
+###############################################################################
+SHUTDOWN=false
+# Track Process IDs to terminate on script exit
+PID_ARR=()
+# Called upon termination of script
+KILL_PROCS() {
+    for PID in "${PID_ARR[@]}"
+    do
+        if ps -p $PID > /dev/null
+        then
+            kill $PID
+        fi
+    done
+    exit 0
+}
+DO_SHUTDOWN() {
+    $SHUTDOWN = true
+    KILL_PROCS
+}
+# Catch SIGUSR signal and kill all processes
+trap DO_SHUTDOWN SIGUSR1
+trap DO_SHUTDOWN SIGINT
+for i in "${!OUTPUTS[@]}"
+do
+    CMD="swxtch-srt route --reconnect --input ${INPUTS[$i]} --output ${OUTPUTS[$i]}"
+    # # Run until termination. On termination respawn process
+    until $CMD; do
+        if [ ! "$SHUTDOWN" ]; then
+            log_error "Process crashed with exit code $?. Respawning... $CMD" >&2
+            sleep $RESTART_TIME
+        else
+            log_info "Shutting down process: $CMD"
+            exit 0
+        fi
+    done &
+    log_info "starting... $CMD"
+    # Save PID 
+    PID_ARR+=($!)
+done
+###############################################################################
+log_info "Succesfully started swxtch-srtroute! Monitoring all processes..."
+wait

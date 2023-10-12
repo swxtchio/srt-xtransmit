@@ -263,3 +263,15 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+
+package-builder/*.buildinfo
+package-builder/*.changes
+package-builder/*.deb
+package-builder/*.ddeb
+package-builder/**/debhelper-build-stamp
+package-builder/**/files
+package-builder/**/*.log
+package-builder/**/*.debhelper
+package-builder/**/*.substvars
+package-builder/**/*.ex
+package-builder/swxtch-srtroute-deb/debian/swxtch-srtroute/

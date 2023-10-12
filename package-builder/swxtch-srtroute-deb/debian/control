@@ -1,0 +1,14 @@
+Source: swxtch-srtroute
+Section: net
+Priority: optional
+Maintainer: Ricky Tran <ricky.tran@swXtch.io>
+Build-Depends: debhelper (>= 10)
+Standards-Version: 4.1.2
+Homepage: www.swxtch.io
+
+Package: swxtch-srtroute
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: swxtch-srtroute tool swxtch.io
+ Installs the swxtch-srtroute. This enables
+ to conversion to/from SRT from/to multicast.
