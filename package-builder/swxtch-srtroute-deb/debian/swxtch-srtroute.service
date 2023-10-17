@@ -9,7 +9,7 @@ Type=simple
 WorkingDirectory=/var/opt/swxtch
 # Delay start of service by 1 second
 ExecStartPre=/bin/sleep 1
-ExecStart=/usr/bin/swxtch-srtroute /var/opt/swxtch/streams.csv
+ExecStart=/usr/bin/swxtch-srtroute /var/opt/swxtch/streams.csv 1
 # Use SIGINT instead of SIGTERM since swxtch apps handle SIGINT (crtl-C) and gracefully shutdown.
 KillSignal=SIGINT
 # Restart on success, failure, and any emitted signals like HUP.

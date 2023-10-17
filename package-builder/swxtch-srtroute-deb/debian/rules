@@ -15,7 +15,7 @@
 
 
 %:
-	dh $@
+	dh $@ --with systemd
 
 
 # dh_make generated override targets
@@ -24,6 +24,8 @@
 #	dh_auto_configure -- #	-DCMAKE_LIBRARY_PATH=$(DEB_HOST_MULTIARCH)
 
 override_dh_auto_install :
+	dh_systemd_enable --no-enable
+	dh_systemd_start --no-start
 	cp -f debian/streams.csv                         debian/swxtch-srtroute/var/opt/swxtch/streams.csv
 	cp -f ../../_build/bin/swxtch-srt                debian/swxtch-srtroute/usr/bin/swxtch-srt
 	cp -f ../../scripts/swxtch-srtroute              debian/swxtch-srtroute/usr/bin/swxtch-srtroute
