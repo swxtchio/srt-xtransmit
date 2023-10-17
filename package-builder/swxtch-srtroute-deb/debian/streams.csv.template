@@ -1,0 +1,16 @@
+udp://239.1.1.1:4001?mode=listener&bind=172.30.0.7,srt://10.96.48.4:4001?mode=listener
+udp://239.1.1.2:4002?mode=listener&bind=172.30.0.7,srt://10.96.48.4:4002?mode=listener
+udp://239.1.1.3:4003?mode=listener&bind=172.30.0.7,srt://10.96.48.4:4003?mode=listener
+udp://239.1.1.4:4004?mode=listener&bind=172.30.0.7,srt://10.96.48.4:4004?mode=listener
+udp://239.1.1.5:4005?mode=listener&bind=172.30.0.7,srt://10.96.48.4:4005?mode=listener
+udp://239.1.1.6:4006?mode=listener&bind=172.30.0.7,srt://10.96.48.4:4006?mode=listener
+udp://239.1.1.7:4007?mode=listener&bind=172.30.0.7,srt://10.96.48.4:4007?mode=listener
+udp://239.1.1.8:4008?mode=listener&bind=172.30.0.7,srt://10.96.48.4:4008?mode=listener
+udp://239.1.1.9:4009?mode=listener&bind=172.30.0.7,srt://10.96.48.4:4009?mode=listener
+udp://239.1.1.10:4010?mode=listener&bind=172.30.0.7,srt://10.96.48.4:4010?mode=listener
+udp://239.1.1.11:4011?mode=listener&bind=172.30.0.7,srt://10.96.48.4:4011?mode=listener
+udp://239.1.1.12:4012?mode=listener&bind=172.30.0.7,srt://10.96.48.4:4012?mode=listener
+udp://239.1.1.13:4013?mode=listener&bind=172.30.0.7,srt://10.96.48.4:4013?mode=listener
+udp://239.1.1.14:4014?mode=listener&bind=172.30.0.7,srt://10.96.48.4:4014?mode=listener
+udp://239.1.1.15:4015?mode=listener&bind=172.30.0.7,srt://10.96.48.4:4015?mode=listener
+udp://239.1.1.16:4016?mode=listener&bind=172.30.0.7,srt://10.96.48.4:4016?mode=listener
