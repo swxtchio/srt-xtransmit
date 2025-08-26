@@ -82,17 +82,17 @@ typedef std::shared_ptr<socket::isocket> shared_sock_t;
 /// @param [in,out] listeting_sock existing listening socket if any.
 /// @return socket connection or nullptr
 /// @throws socket::exception
-shared_sock_t create_connection(const std::vector<UriParser>& uris, shared_sock_t& listeting_sock);
+shared_sock_t create_connection(const std::vector<UriParser>& uris, shared_sock_t& listeting_sock, socket::Direction dir = socket::Direction::UNKNOWN);
 
 /// @brief Create SRT or UDP socket connection.
 /// The same as with two arguments, but using a temporal listeting_sock variable.
 /// @param [in] uris connection URIs
 /// @return socket connection or nullptr
 /// @throws socket::exception
-inline shared_sock_t create_connection(const std::vector<UriParser>& uris)
+inline shared_sock_t create_connection(const std::vector<UriParser>& uris, socket::Direction dir = socket::Direction::UNKNOWN)
 {
 	shared_sock_t temp_sock;
-	return create_connection(uris, temp_sock);
+	return create_connection(uris, temp_sock, dir);
 }
 
 

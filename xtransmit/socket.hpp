@@ -19,6 +19,8 @@ namespace xtransmit
 namespace socket
 {
 
+enum class Direction { UNKNOWN, SENDER, RECEIVER };
+
 class exception : public std::exception
 {
 public:

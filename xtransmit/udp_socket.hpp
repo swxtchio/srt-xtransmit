@@ -23,7 +23,7 @@ class udp
 	using string     = std::string;
 
 public:
-	udp(const UriParser &src_uri);
+	udp(const UriParser &src_uri, Direction dir = Direction::UNKNOWN);
 	~udp();
 
 public:
@@ -44,10 +44,16 @@ public:
 	int    write(const const_buffer &buffer, int timeout_ms = -1) final;
 
 private:
+	bool is_multicast_address(const string& host) const;
+	void setup_multicast_sender(const sockaddr_in* bind_addr = nullptr);
+	void setup_multicast_receiver(const sockaddr_in* bind_addr = nullptr);
+
+private:
 	SOCKET m_bind_socket = -1; // INVALID_SOCK;
 	sockaddr_in m_dst_addr = {};
 
 	bool                     m_blocking_mode = false;
+	bool                     m_is_multicast = false;
 	string                   m_host;
 	int                      m_port;
 	std::map<string, string> m_options; // All other options, as provided in the URI

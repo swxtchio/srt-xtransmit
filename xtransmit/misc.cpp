@@ -15,7 +15,7 @@ namespace xtransmit {
 #define LOG_SC_CONN "CONN "
 
 
-shared_sock_t create_connection(const vector<UriParser>& parsed_urls, shared_sock_t& listening_sock)
+shared_sock_t create_connection(const vector<UriParser>& parsed_urls, shared_sock_t& listening_sock, socket::Direction dir)
 {
 	if (parsed_urls.empty())
 	{
@@ -50,7 +50,7 @@ shared_sock_t create_connection(const vector<UriParser>& parsed_urls, shared_soc
 
 	if (uri.type() == UriParser::UDP)
 	{
-		return make_shared<socket::udp>(uri);
+		return make_shared<socket::udp>(uri, dir);
 	}
 
 	const auto uri_type = uri.type();
